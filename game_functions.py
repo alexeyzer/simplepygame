@@ -53,13 +53,15 @@ def check_dead(player1, player2, screen):
 
 
 def fire_bullet(screen, sp, ship, bullets, special):
-    new_bullet = bullet(screen, sp, ship)
-    if special == -1:
-        new_bullet.speed = -2
-    bullets.add(new_bullet)
+    if ship.bullets_number < 5:
+        new_bullet = bullet(screen, sp, ship)
+        if special == -1:
+            new_bullet.speed = -sp.bullet_speed
+        bullets.add(new_bullet)
+        ship.bullets_number += 1
 
 def bullet_inside(bullet, player):
-    if (bullet.rect.centerx < player.rect.right and bullet.rect.centerx > player.rect.left + 150) and (bullet.rect.centery > player.rect.top + 80 and bullet.rect.centery < player.rect.bottom - 80):
+    if (bullet.rect.centerx < player.rect.right and bullet.rect.centerx > player.rect.left) and (bullet.rect.centery > player.rect.top + 60 and bullet.rect.centery < player.rect.bottom - 60):
         return True
     else:
         return False
@@ -70,21 +72,31 @@ def update_bullet(bullets, player1, player2):
     for bullet in bullets.copy():
         if bullet.rect.left > player1.screen_rect.right or bullet.rect.right < player1.screen_rect.left:
             bullets.remove(bullet)
+            bullet.ship.bullets_number -= 1
         if bullet_inside(bullet, player1) and bullet.ship != player1:
             player1.hp -=1
             bullets.remove(bullet)
-            print("player1 damaged")
+            bullet.ship.bullets_number -= 1
+            print("Player1:", player1.hp, "hp")
         elif bullet_inside(bullet, player2) and bullet.ship != player2:
             player2.hp -=1
             bullets.remove(bullet)
-            print("player2 damaged")
+            bullet.ship.bullets_number -= 1
+            print("Player2: ", player2.hp, "hp")
 
-def update_screen(settings, screen, plane1, plane2, bullets, text):
-    screen.fill(settings.bg_color)
+def update_screen(settings, screen, plane1, plane2, bullets, text, background1, background2, decorations):
+    #screen.fill(settings.bg_color)
+
+    background1.blitme()
+    background2.blitme()
+
     for bullet in bullets.sprites():
         bullet.draw_bullet()
     plane1.blitme()
     plane2.blitme()
+
+    decorations.blitme()
+    
     if text != None:
         text.blitme()
     pygame.display.flip()
